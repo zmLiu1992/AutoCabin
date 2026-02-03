@@ -1,0 +1,10 @@
+#!name=[StarCruise] 自動查房
+#!desc=Token 過期，請重新登入
+
+[Script]
+[StarCruise] 自動查房 = type=generic, script-path=https://raw.githubusercontent.com/zmLiu1992/Cabin/refs/heads/master/StarCruiseCheckCabin.js, timeout=60
+
+[StarCruise] 取得token = type=http-response,pattern=^https:\/\/backend-prd\.b2m\.stardreamcruises\.com\/auth\/customer\/(login|refresh)$,requires-body=1,script-path=https://example.com/stardream-auth-capture.js
+
+[MITM]
+hostname = %APPEND% backend-prd.b2m.stardreamcruises.com

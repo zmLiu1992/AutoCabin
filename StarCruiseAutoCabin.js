@@ -32,7 +32,7 @@
   const STORE_KEY = "StarCruise_JWT_Token";
 
   function getJwtTokens() {
-    tokenCollection = $persistentStore.read(STORE_KEY);
+    let tokenCollection = $persistentStore.read(STORE_KEY);
     let json;
     try {
       json = JSON.parse(tokenCollection);
@@ -43,7 +43,7 @@
   }
 
   function refreshJwtTokens() {
-    tokens = getJwtTokens();
+    let tokens = getJwtTokens();
     if (tokens == null) {
       starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
       $done();
@@ -107,9 +107,10 @@
       $persistentStore.write(JSON.stringify(payload), STORE_KEY);
       starCruiseNotify('更新金鑰成功', '');
     }
+  }
 
     function getCustomerInfo() {
-      tokens = getJwtTokens();
+      let tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -159,7 +160,7 @@
     }
 
     function getPortInfos() {
-      tokens = getJwtTokens();
+      let tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -215,7 +216,7 @@
     }
 
     function getDepartureDates(portNum) {
-      tokens = getJwtTokens();
+      let tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -265,7 +266,7 @@
 
 
     function getItinerary(portNum, departureDate) {
-      tokens = getJwtTokens();
+      let tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -319,7 +320,7 @@
     }
 
     function checkCabin(portNum, departureDate, itineraryName, persons) {
-      tokens = getJwtTokens();
+      let tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();

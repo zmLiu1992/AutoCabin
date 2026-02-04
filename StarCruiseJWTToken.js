@@ -14,6 +14,7 @@ let json;
 try {
     json = JSON.parse($response.body);
 } catch {
+    starCruiseNotify('解析失敗 ‼️', '請重新登入');
     $done({});
 }
 
@@ -34,12 +35,9 @@ if (typeof accessToken === "string" && accessToken.length &&
     };
 
     const isSaveTokenSuccess = $persistentStore.write(JSON.stringify(payload), STORE_KEY);
-    if (isSaveTokenSuccess)
-    {
+    if (isSaveTokenSuccess) {
         starCruiseNotify('保存成功', '');
-    }
-    else
-    {
+    } else {
         starCruiseNotify('保存失敗 ‼️', '請重新登入');
     }
 }

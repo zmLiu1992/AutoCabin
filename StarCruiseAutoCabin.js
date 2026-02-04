@@ -601,6 +601,8 @@
 
      if (enableNotify == 0) {
        quickDisplay(msg);
+     } else {
+       console.log(`CabinLog: ${msg}`);
      }
 
    } catch (e) {

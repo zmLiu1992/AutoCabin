@@ -602,7 +602,7 @@
      if (enableNotify == 0) {
        quickDisplay(msg);
      } else {
-       console.log(`CabinLog: ${msg}`);
+       console.log(`${msg}`);
      }
 
    } catch (e) {

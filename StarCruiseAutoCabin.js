@@ -407,11 +407,11 @@
                  item => notifyCabins.includes(item.cabin_name)
                );
 
-               const output = targets
-                 .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.cabin_name}`)
-                 .join("\n");
+               if (targets) {
+                 const output = targets
+                   .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.cabin_name}`)
+                   .join("\n");
 
-               if (targetCabin) {
                  starCruiseNotify('找到房間', output);
                  console.log(output);
                }

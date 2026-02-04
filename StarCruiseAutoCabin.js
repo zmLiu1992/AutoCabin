@@ -403,7 +403,7 @@
                  notifyCabins = [cabinName_Balcony, cabinName_Oceanview, cabinName_Interior];
                }
 
-               const targets = data.items.filter(
+               const targets = jsonData.items.filter(
                  item => notifyCabins.includes(item.cabin_name)
                );
 

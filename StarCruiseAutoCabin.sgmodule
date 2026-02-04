@@ -6,8 +6,7 @@
 
 [StarCruise] 取得token = type=http-response,pattern=^https:\/\/backend-prd\.b2m\.stardreamcruises\.com\/auth\/customer\/(login|refresh)$,requires-body=1,script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/master/StarCruiseJWTToken.js
 
-[Cron]
-[StarCruise] 自動查房 = type=cron, cronexp="*/10 * * * *", script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/master/StarCruiseAutoCabin.js, timeout=60
+[StarCruise] 自動查房 = type=cron, cronexp="*/10 * * * *", script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/master/StarCruiseAutoCabin.js, wake-system=1, timeout=120
 
 [MITM]
 hostname = %APPEND% backend-prd.b2m.stardreamcruises.com

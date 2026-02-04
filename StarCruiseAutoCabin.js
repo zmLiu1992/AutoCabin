@@ -520,6 +520,8 @@
  async function execute() {
    const maxMessageCount = 8;
 
+   await new Promise(r => setTimeout(r, Math.random() * 30000))
+
    try {
      const input = $intent.parameter;
      const parameters = input.split("|");

@@ -1,8 +1,9 @@
 #!name=[StarCruise] 自動查房
 #!desc=自動查詢房間，金鑰過期請重新登入
 
-[Script]
-[StarCruise] 自動查房 = type=generic, script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/refs/heads/master/StarCruiseAutoCabin.js, timeout=60
+[Cron]
+[StarCruise] 自動查房 = type=cron, cronexp="*/10 * * * *", script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/refs/heads/master/StarCruiseAutoCabin.js, timeout=60
+
 
 [StarCruise] 取得token = type=http-response,pattern=^https:\/\/backend-prd\.b2m\.stardreamcruises\.com\/auth\/customer\/(login|refresh)$,requires-body=1,script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/refs/heads/master/StarCruiseJWTToken.js
 

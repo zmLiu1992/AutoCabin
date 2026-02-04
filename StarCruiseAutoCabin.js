@@ -61,12 +61,19 @@
 
  function getJwtTokens() {
    const tokenCollection = $persistentStore.read(STORE_KEY);
+   if (tokenCollection == null) {
+     return null;
+   }
 
    try {
      return JSON.parse(tokenCollection);
    } catch {
      return null;
    }
+ }
+
+ function deleteJwtTokens() {
+   $persistentStore.write(null, STORE_KEY);
  }
 
  function refreshJwtTokens() {
@@ -103,6 +110,7 @@
 
            } catch (e) {
              //starCruiseNotify('金鑰更新失敗 ‼️', String(e));
+             deleteJwtTokens();
              quickLogin();
              resolve('');
              $done();
@@ -110,6 +118,7 @@
            }
          } else {
            //starCruiseNotify('金鑰更新失敗 ‼️', `${response.status} 請重新登入`);
+           deleteJwtTokens();
            quickLogin();
            resolve('');
            $done();
@@ -146,7 +155,6 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      //starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     quickLogin();
      $done();
      return;
    }

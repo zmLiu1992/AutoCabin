@@ -529,6 +529,8 @@
  async function execute() {
    const maxMessageCount = 8;
 
+   console.log("Run auto cabin bot.")
+
    try {
      const portNum = $persistentStore.read(PORT_KEY) ?? 12;
      const persons = $persistentStore.read(PAX_KEY) ?? 3;

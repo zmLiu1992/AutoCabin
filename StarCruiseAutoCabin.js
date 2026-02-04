@@ -532,10 +532,10 @@
    console.log("Run auto cabin bot.")
 
    try {
-     const portNum = $persistentStore.read(PORT_KEY) ?? 12;
-     const persons = $persistentStore.read(PAX_KEY) ?? 3;
-     const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) ?? "五";
-     const enableNotify = $persistentStore.read(ENABLE_NOTIFY_KEY) = 0; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
+     const portNum = $persistentStore.read(PORT_KEY) || 12;
+     const persons = $persistentStore.read(PAX_KEY) || 3;
+     const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) || "五";
+     const enableNotify = $persistentStore.read(ENABLE_NOTIFY_KEY) || 0; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
 
      let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
      if (checkDayStr != null && typeof checkDayStr === "string") {

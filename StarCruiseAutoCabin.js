@@ -531,7 +531,7 @@
        checkDays = checkDayStr.split("");
      }
 
-     if (Number.isNaN(cabinTypeCode)) {
+     if (Number.isNaN(enableNotify)) {
        enableNotify = 0;
      }
 

@@ -1,5 +1,5 @@
 #!name=[StarCruise] 自動查房
-#!desc=Token 過期，請重新登入
+#!desc=自動查詢房間，金鑰過期請重新登入
 
 [Script]
 [StarCruise] 自動查房 = type=generic, script-path=https://raw.githubusercontent.com/zmLiu1992/AutoCabin/refs/heads/master/StarCruiseAutoCabin.js, timeout=60

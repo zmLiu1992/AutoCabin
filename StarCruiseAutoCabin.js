@@ -32,18 +32,17 @@
   const STORE_KEY = "StarCruise_JWT_Token";
 
   function getJwtTokens() {
-    let tokenCollection = $persistentStore.read(STORE_KEY);
-    let json;
+    const tokenCollection = $persistentStore.read(STORE_KEY);
+
     try {
-      json = JSON.parse(tokenCollection);
-      return json;
+      return JSON.parse(tokenCollection);
     } catch {
       return null;
     }
   }
 
   function refreshJwtTokens() {
-    let tokens = getJwtTokens();
+    const tokens = getJwtTokens();
     if (tokens == null) {
       starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
       $done();
@@ -64,12 +63,16 @@
           resolve('');
           $done();
           return;
+
         } else {
           if (response.status === 200) {
             try {
               const datas = JSON.parse(body);
               updateJwtToken(datas);
               resolve('');
+              $done();
+              return;
+
             } catch (e) {
               starCruiseNotify('金鑰更新失敗 ‼️', String(e));
               resolve('');
@@ -110,7 +113,7 @@
   }
 
     function getCustomerInfo() {
-      let tokens = getJwtTokens();
+      const tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -131,12 +134,14 @@
             resolve('');
             $done();
             return;
+
           } else {
             if (response.status === 200) {
               try {
                 const datas = JSON.parse(body);
                 const info = `剩餘客房點數：${datas.cabin_credits} P`;
                 resolve(info);
+
               } catch (e) {
                 starCruiseNotify('旅客資訊查詢失敗 ‼️', String(e));
                 resolve('');
@@ -144,12 +149,14 @@
                 return;
               }
             } else if (response.status === 401) {
-              refreshJwtTokens();
-              resolve('');
-              $done();
-              return;
+              refreshJwtTokens().then(()=>{
+                resolve('');
+                $done();
+                return;
+              });
+              
             } else {
-              starCruiseNotify('Cookie 已過期 ‼️', '請重新登入');
+              starCruiseNotify('Token 已過期 ‼️', `(${response.status}) 請重新登入`);
               resolve('');
               $done();
               return;
@@ -160,7 +167,7 @@
     }
 
     function getPortInfos() {
-      let tokens = getJwtTokens();
+      const tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -193,6 +200,7 @@
                   }, {});
 
                 resolve(portDictionary);
+
               } catch (e) {
                 starCruiseNotify('港口清單查詢失敗 ‼️', String(e));
                 resolve({});
@@ -200,12 +208,14 @@
                 return;
               }
             } else if (response.status === 401) {
-              refreshJwtTokens();
-              resolve('');
-              $done();
+              refreshJwtTokens().then(()=>{
+                resolve('');
+                $done();  
+              });
               return;
+
             } else {
-              starCruiseNotify('Cookie 已過期 ‼️', '請重新登入');
+              starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
               resolve({});
               $done();
               return;
@@ -216,7 +226,7 @@
     }
 
     function getDepartureDates(portNum) {
-      let tokens = getJwtTokens();
+      const tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -249,12 +259,14 @@
                 return;
               }
             } else if (response.status === 401) {
-              refreshJwtTokens();
-              resolve('');
-              $done();
+              refreshJwtTokens().then(()=>{
+                resolve('');
+                $done();
+              });
               return;
+
             } else {
-              starCruiseNotify('Cookie 已過期 ‼️', '請重新登入');
+              starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
               resolve([]);
               $done();
               return;
@@ -264,9 +276,8 @@
       });
     }
 
-
     function getItinerary(portNum, departureDate) {
-      let tokens = getJwtTokens();
+      const tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -304,12 +315,14 @@
                 return;
               }
             } else if (response.status === 401) {
-              refreshJwtTokens();
-              resolve('');
-              $done();
+              refreshJwtTokens().then(()=>{
+                resolve('');
+                $done();  
+              });
               return;
+
             } else {
-              starCruiseNotify('Cookie 已過期 ‼️', '請重新登入');
+              starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
               resolve('');
               $done();
               return;
@@ -320,7 +333,7 @@
     }
 
     function checkCabin(portNum, departureDate, itineraryName, persons) {
-      let tokens = getJwtTokens();
+      const tokens = getJwtTokens();
       if (tokens == null) {
         starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
         $done();
@@ -360,12 +373,14 @@
                 return;
               }
             } else if (response.status === 401) {
-              refreshJwtTokens();
-              resolve('');
-              $done();
+              refreshJwtTokens().then(()=>{
+                resolve('');
+                $done();  
+              });
               return;
+
             } else {
-              starCruiseNotify('Cookie 已過期 ‼️', '請重新登入');
+              starCruiseNotify('Cookie 已過期 ‼️', `(${response.status})請重新登入`);
               resolve([]);
               $done();
               return;

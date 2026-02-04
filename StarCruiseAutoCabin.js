@@ -502,7 +502,7 @@
           const date = departureDates[i];
 
           const dateDay = getDateDayValue(date);
-          if (onlyWeekend == 1 && (dateDay != "五" || dateDay != "六" || dateDay != "日")){
+          if (onlyWeekend == 1 && (dateDay != "五" && dateDay != "六" && dateDay != "日")){
             continue;
           }
 

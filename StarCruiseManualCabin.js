@@ -54,11 +54,6 @@
  }
 
  const STORE_KEY = "StarCruise_JWT_Token";
- const PORT_KEY = "StarCruise_portNum";
- const PAX_KEY = "StarCruise_paxNum";
- const CHECK_DAY_KEY = "StarCruise_day";
- const ENABLE_NOTIFY_KEY = "StarCruise_enableNotify";
-
  const cabinName_Balcony = "Balcony Stateroom";
  const cabinName_Oceanview = "Oceanview Stateroom";
  const cabinName_Interior = "Interior Stateroom";
@@ -527,13 +522,19 @@
 
    await new Promise(r => setTimeout(r, Math.random() * 30000))
 
-
    try {
-     const portNum = $persistentStore.read(PORT_KEY) ?? 12;
-     const persons = $persistentStore.read(PAX_KEY) ?? 3;
-     const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) ?? "五";
-     const enableNotify = $persistentStore.read(ENABLE_NOTIFY_KEY) = 0; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
+     const input = $intent.parameter;
+     const parameters = input.split("|");
+     const portNum = parseInt(parameters[0], 10);
+     const persons = parseInt(parameters[1], 10);
+     const checkDayStr = parameters[2];
+     const enableNotify = parameters[3]; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
 
+     if (Number.isNaN(portNum) || Number.isNaN(persons)) {
+       starCruiseNotify('參數錯誤', '請正確輸入港口編號與人數！');
+       $done();
+       return;
+     }
 
      let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
      if (checkDayStr != null && typeof checkDayStr === "string") {

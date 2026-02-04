@@ -44,7 +44,7 @@
    $notification.post(
      "[StarCruise] 金鑰失效",
      `點擊重新登入`,
-     result, {
+     '', {
        action: "open-url", // 點通知後執行「開網址」
        url, // 這個網址就是上面的 shortcuts://...
        sound: true, //（可選）有提示音

@@ -409,7 +409,7 @@
 
                if (targets) {
                  const output = targets
-                   .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.cabin_name}`)
+                   .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.traditional_chinese_cabin_name}`)
                    .join("\n");
 
                  starCruiseNotify('找到房間', output);

@@ -414,6 +414,17 @@
       return `${month}/${day} (${days[date.getDay()]})`;
     }
 
+    function getDateDayValue(dateStr){
+      const date = new Date(dateStr);
+      const days = ["日", "一", "二", "三", "四", "五", "六"];
+
+      // Display date without year.
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      return `${days[date.getDay()]}`;
+    }
+
     function getDateYearMonth(dateStr) {
       const date = new Date(dateStr);
       const year = date.getFullYear();
@@ -452,12 +463,17 @@
         const parameters = input.split("|");
         const portNum = parseInt(parameters[0], 10);
         const persons = parseInt(parameters[1], 10);
+        const onlyWeekend = parseInt(parameters[2], 10);
 
         if (Number.isNaN(portNum) || Number.isNaN(persons)) {
           starCruiseNotify('參數錯誤', '請正確輸入港口編號與人數！');
           $done();
           return;
         }
+		
+		if (Number.isNaN(onlyWeekend)){
+			onlyWeekend = 0; // false
+		}
 
         const customerInfo = await getCustomerInfo();
         if (customerInfo === '') {
@@ -484,6 +500,12 @@
         let lastGroupYearMonth = "";
         for (let i = 0; i < departureDates.length; i++) {
           const date = departureDates[i];
+
+          const dateDay = getDateDayValue(date);
+          if (onlyWeekend == 1 && (dateDay != "五" || dateDay != "六" || dateDay != "日")){
+            continue;
+          }
+
           const itinerary = await getItinerary(portNum, date);
           const cabins = await checkCabin(portNum, date, urlencode(itinerary), persons);
 

@@ -6,7 +6,7 @@ function starCruiseNotify(subtitle = '', message = '') {
 
 const STORE_KEY = "StarCruise_JWT_Token";
 
-if ($request.method !== "POST" || !$response?.body) {
+if (!$response?.body) {
     $done({});
 }
 

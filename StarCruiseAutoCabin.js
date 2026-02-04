@@ -407,7 +407,7 @@
                  item => notifyCabins.includes(item.cabin_name)
                );
 
-               if (targets) {
+               if (targets.length > 0) {
                  const output = targets
                    .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.traditional_chinese_cabin_name}`)
                    .join("\n");

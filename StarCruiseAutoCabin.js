@@ -522,18 +522,18 @@
    return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
  }
 
+ function randomDelay(maxMs = 3000) {
+   return new Promise(r => setTimeout(r, Math.random() * maxMs))
+ }
+
  async function execute() {
    const maxMessageCount = 8;
-
-   await new Promise(r => setTimeout(r, Math.random() * 30000))
-
 
    try {
      const portNum = $persistentStore.read(PORT_KEY) ?? 12;
      const persons = $persistentStore.read(PAX_KEY) ?? 3;
      const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) ?? "五";
      const enableNotify = $persistentStore.read(ENABLE_NOTIFY_KEY) = 0; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
-
 
      let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
      if (checkDayStr != null && typeof checkDayStr === "string") {
@@ -551,6 +551,7 @@
        return;
      }
 
+     await randomDelay();
      const portDictionary = await getPortInfos();
      if (!(portNum in portDictionary)) {
        starCruiseNotify('港口編號錯誤', `未知港口編號 ${portNum}`);
@@ -558,6 +559,7 @@
        return;
      }
 
+     await randomDelay();
      const departureDates = await getDepartureDates(portNum);
      if (departureDates.length == 0) {
        starCruiseNotify('出發日查詢', '沒有資料');
@@ -575,13 +577,15 @@
          continue;
        }
 
+       await randomDelay();
        const itinerary = await getItinerary(portNum, date);
+       await randomDelay();
        const cabins = await checkCabin(portNum, date, urlencode(itinerary), persons, enableNotify);
 
        const shortItinerary = getShortItinerary(itinerary);
        const cabinInfo = getCabinInfos(cabins);
 
-       const yearMonth = getDateYearMonth(date);
+      const yearMonth = getDateYearMonth(date);
        if (lastGroupYearMonth !== yearMonth) {
          if (lastGroupYearMonth != "") {
            messages.push('\n');

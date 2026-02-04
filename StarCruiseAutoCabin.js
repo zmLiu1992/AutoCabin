@@ -463,7 +463,7 @@
         const parameters = input.split("|");
         const portNum = parseInt(parameters[0], 10);
         const persons = parseInt(parameters[1], 10);
-        const onlyWeekend = parseInt(parameters[2], 10);
+        const checkDayStr = parameters[2];
 
         if (Number.isNaN(portNum) || Number.isNaN(persons)) {
           starCruiseNotify('參數錯誤', '請正確輸入港口編號與人數！');
@@ -471,8 +471,9 @@
           return;
         }
 		
-		if (Number.isNaN(onlyWeekend)){
-			onlyWeekend = 0; // false
+		let checkDays = ["一","二","三","四","五","六","日"]
+		if (checkDayStr != null && typeof checkDayStr === "string"){
+			checkDays = checkDayStr.split("");
 		}
 
         const customerInfo = await getCustomerInfo();
@@ -502,7 +503,7 @@
           const date = departureDates[i];
 
           const dateDay = getDateDayValue(date);
-          if (onlyWeekend == 1 && (dateDay != "五" && dateDay != "六" && dateDay != "日")){
+          if (!checkDays.includes(dateDay)){
             continue;
           }
 

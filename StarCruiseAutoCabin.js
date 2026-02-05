@@ -109,8 +109,8 @@
            try {
              const datas = JSON.parse(body);
              updateJwtToken(datas);
-             resolve('');
-             $done();
+
+             reject(new RetryError("Token refreshed"));
              return;
 
            } catch (e) {
@@ -193,11 +193,10 @@
              return;
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().then(() => {
-             resolve('');
-             $done();
-             return;
-           });
+           refreshJwtTokens()
+             .then(() => reject(new RetryError("Token refreshed in getCustomerInfo")))
+             .catch(reject);
+           return;
 
          } else {
            starCruiseNotify('Token 已過期 ‼️', `(${response.status}) 請重新登入`);
@@ -252,10 +251,9 @@
              return;
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().then(() => {
-             resolve('');
-             $done();
-           });
+           refreshJwtTokens()
+             .then(() => reject(new RetryError("Token refreshed in getPortInfos")))
+             .catch(reject);
            return;
 
          } else {
@@ -303,10 +301,9 @@
              return;
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().then(() => {
-             resolve('');
-             $done();
-           });
+           refreshJwtTokens()
+             .then(() => reject(new RetryError("Token refreshed in getDepartureDates")))
+             .catch(reject);
            return;
 
          } else {
@@ -359,10 +356,9 @@
              return;
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().then(() => {
-             resolve('');
-             $done();
-           });
+           refreshJwtTokens()
+             .then(() => reject(new RetryError("Token refreshed in getItinerary")))
+             .catch(reject);
            return;
 
          } else {
@@ -440,10 +436,9 @@
              return;
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().then(() => {
-             resolve('');
-             $done();
-           });
+           refreshJwtTokens()
+             .then(() => reject(new RetryError("Token refreshed in getItinerary")))
+             .catch(reject);
            return;
 
          } else {
@@ -526,8 +521,38 @@
    return new Promise(r => setTimeout(r, Math.random() * maxMs))
  }
 
+ class RetryError extends Error {
+   constructor(message) {
+     super(message);
+     this.name = "RetryError";
+   }
+ }
+
+ function sleep(ms) {
+   return new Promise(r => setTimeout(r, ms));
+ }
+
+ async function executeWithRetry(maxRetry = 1) {
+   for (let attempt = 0; attempt <= maxRetry; attempt++) {
+     try {
+       await execute();
+       return;
+     } catch (e) {
+       if (e && e.name === "RetryError" && attempt < maxRetry) {
+         console.log(`[Retry] ${e.message} -> rerun execute()`);
+         await sleep(800);
+         continue;
+       }
+       throw e;
+     }
+   }
+ }
+
+
  async function execute() {
    const maxMessageCount = 8;
+
+   await new Promise(r => setTimeout(r, Math.random() * 30000))
 
    console.log("Run auto cabin bot.")
 
@@ -587,7 +612,7 @@
        const shortItinerary = getShortItinerary(itinerary);
        const cabinInfo = getCabinInfos(cabins);
 
-      const yearMonth = getDateYearMonth(date);
+       const yearMonth = getDateYearMonth(date);
        if (lastGroupYearMonth !== yearMonth) {
          if (lastGroupYearMonth != "") {
            messages.push('\n');
@@ -630,4 +655,9 @@
    return;
  }
 
- execute();
+ executeWithRetry(1)
+   .then(() => $done())
+   .catch(e => {
+     console.log('執行錯誤', String(e && e.message ? e.message : e));
+     $done();
+   });

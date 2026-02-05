@@ -147,7 +147,7 @@
      };
 
      $persistentStore.write(JSON.stringify(payload), STORE_KEY);
-     starCruiseNotify('更新金鑰成功', '');
+     // starCruiseNotify('更新金鑰成功', '');
    }
  }
 
@@ -510,9 +510,6 @@
    const maxMessageCount = 8;
 
    await new Promise(r => setTimeout(r, Math.random() * 30000))
-
-   console.log("Run auto cabin bot.")
-
 
    const portNum = String($persistentStore.read(PORT_KEY) || "12");
    const persons = parseInt($persistentStore.read(PAX_KEY) || "3", 10);

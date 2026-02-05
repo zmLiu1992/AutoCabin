@@ -89,7 +89,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: 'https://backend-prd.b2m.stardreamcruises.com/auth/customer/refresh',
        headers: {
@@ -164,7 +164,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: 'https://backend-prd.b2m.stardreamcruises.com/auth/customer/report',
        headers: {
@@ -217,7 +217,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: 'https://backend-prd.b2m.stardreamcruises.com/customers/list/port?lang=hant&page=1',
        headers: {
@@ -275,7 +275,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: `https://backend-prd.b2m.stardreamcruises.com/customers/list/departure-date?departure_port=${portNum}&lang=hant`,
        headers: {
@@ -325,7 +325,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: `https://backend-prd.b2m.stardreamcruises.com/customers/list/itinerary?port_id=${portNum}&departure_date=${departureDate}&lang=hant&page=1`,
        headers: {
@@ -380,7 +380,7 @@
      return;
    }
 
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
      const requestUrl = {
        url: `https://backend-prd.b2m.stardreamcruises.com/customers/cabin-allotment?itinerary_name=${itineraryName}&departure_date=${departureDate}&departure_port=${portNum}&pax=${persons}&lang=hant&currentStep=0&page=1`,
        headers: {

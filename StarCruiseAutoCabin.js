@@ -84,69 +84,64 @@
  function refreshJwtTokens() {
    const tokens = getJwtTokens();
    if (tokens == null) {
-     starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     deleteJwtTokens();
+     quickLogin();
+     return Promise.reject(new RetryError("Token missing"));
    }
 
    return new Promise((resolve, reject) => {
      const requestUrl = {
        url: 'https://backend-prd.b2m.stardreamcruises.com/auth/customer/refresh',
        headers: {
-         'authorization': `Bearer ${tokens.refreshToken}`,
+         'authorization': `Bearer ${tokens.refreshToken}`
        }
      };
 
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
-         starCruiseNotify('金鑰更新失敗 ‼️', '連線錯誤，請重新登入');
-         resolve('');
-         $done();
+         reject(new Error("Refresh network error"));
          return;
+       }
 
-       } else {
-         if (response.status === 200) {
-           try {
-             const datas = JSON.parse(body);
-             updateJwtToken(datas);
-
-             reject(new RetryError("Token refreshed"));
-             return;
-
-           } catch (e) {
-             //starCruiseNotify('金鑰更新失敗 ‼️', String(e));
-             deleteJwtTokens();
-             quickLogin();
-             resolve('');
-             $done();
-             return;
-           }
-         } else {
-           //starCruiseNotify('金鑰更新失敗 ‼️', `${response.status} 請重新登入`);
+       if (response.status === 200) {
+         try {
+           const datas = JSON.parse(body);
+           updateJwtToken(datas);
+           reject(new RetryError("Token refreshed")); // 觸發外層重跑
+           return;
+         } catch (e) {
            deleteJwtTokens();
            quickLogin();
-           resolve('');
-           $done();
+           reject(new RetryError("Refresh parse error"));
            return;
          }
        }
+
+       deleteJwtTokens();
+       quickLogin();
+       reject(new RetryError("Refresh failed status=" + response.status));
      });
    });
  }
 
+
  function updateJwtToken(json) {
-   const accessToken = json?.accessToken;
-   const refreshToken = json?.refreshToken;
+   const accessToken = json && json.accessToken;
+   const refreshToken = json && json.refreshToken;
+   const user = (json && json.user) ? json.user : {};
+
+   const sub = (user && user.sub) ? user.sub : null;
+   const dpiHiFai = (user && user.dpiHiFai) ? user.dpiHiFai : null;
 
    if (typeof accessToken === "string" && accessToken.length &&
      typeof refreshToken === "string" && refreshToken.length) {
 
      const payload = {
-       accessToken,
-       refreshToken,
+       accessToken: accessToken,
+       refreshToken: refreshToken,
        user: {
-         sub: json?.user?.sub ?? null,
-         dpiHiFai: json?.user?.dpiHiFai ?? null
+         sub: sub,
+         dpiHiFai: dpiHiFai
        },
        capturedAt: new Date().toISOString()
      };
@@ -160,8 +155,7 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      //starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     return null;
    }
 
    return new Promise((resolve, reject) => {
@@ -175,9 +169,7 @@
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
          starCruiseNotify('旅客資訊查詢失敗 ‼️', '連線錯誤');
-         resolve('');
-         $done();
-         return;
+         resolve(null);
 
        } else {
          if (response.status === 200) {
@@ -188,21 +180,15 @@
 
            } catch (e) {
              starCruiseNotify('旅客資訊查詢失敗 ‼️', String(e));
-             resolve('');
-             $done();
-             return;
+             resolve(null);
            }
          } else if (response.status === 401) {
-           refreshJwtTokens()
-             .then(() => reject(new RetryError("Token refreshed in getCustomerInfo")))
-             .catch(reject);
+           refreshJwtTokens().catch(reject);
            return;
 
          } else {
            starCruiseNotify('Token 已過期 ‼️', `(${response.status}) 請重新登入`);
-           resolve('');
-           $done();
-           return;
+           resolve(null);
          }
        }
      });
@@ -213,8 +199,7 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     return null;
    }
 
    return new Promise((resolve, reject) => {
@@ -228,9 +213,8 @@
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
          starCruiseNotify('港口清單查詢失敗 ‼️', '連線錯誤');
-         resolve({});
-         $done();
-         return;
+         resolve(null);
+
        } else {
          if (response.status === 200) {
            try {
@@ -238,7 +222,7 @@
              const portDictionary = datas.items
                .filter(item => item.status === true)
                .reduce((acc, item) => {
-                 acc[item.id] = item.traditional_chinese_port_name;
+                 acc[String(item.id)] = item.traditional_chinese_port_name;
                  return acc;
                }, {});
 
@@ -246,21 +230,16 @@
 
            } catch (e) {
              starCruiseNotify('港口清單查詢失敗 ‼️', String(e));
-             resolve({});
-             $done();
-             return;
+             resolve(null);
+
            }
          } else if (response.status === 401) {
-           refreshJwtTokens()
-             .then(() => reject(new RetryError("Token refreshed in getPortInfos")))
-             .catch(reject);
+           refreshJwtTokens().catch(reject);
            return;
 
          } else {
            starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
-           resolve({});
-           $done();
-           return;
+           resolve(null);
          }
        }
      });
@@ -271,8 +250,7 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     return null;
    }
 
    return new Promise((resolve, reject) => {
@@ -286,9 +264,8 @@
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
          starCruiseNotify('出發日查詢失敗 ‼️', '連線錯誤');
-         resolve([]);
-         $done();
-         return;
+         resolve(null);
+
        } else {
          if (response.status === 200) {
            try {
@@ -296,21 +273,15 @@
              resolve(datas);
            } catch (e) {
              starCruiseNotify('出發日查詢失敗 ‼️', String(e));
-             resolve([]);
-             $done();
-             return;
+             resolve(null);
            }
          } else if (response.status === 401) {
-           refreshJwtTokens()
-             .then(() => reject(new RetryError("Token refreshed in getDepartureDates")))
-             .catch(reject);
+           refreshJwtTokens().catch(reject);
            return;
 
          } else {
            starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
-           resolve([]);
-           $done();
-           return;
+           resolve(null);
          }
        }
      });
@@ -321,8 +292,7 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     return null;
    }
 
    return new Promise((resolve, reject) => {
@@ -336,9 +306,8 @@
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
          starCruiseNotify('出航查詢失敗 ‼️', '連線錯誤');
-         resolve('');
-         $done();
-         return;
+         resolve(null);
+
        } else {
          if (response.status === 200) {
            try {
@@ -351,21 +320,15 @@
 
            } catch (e) {
              starCruiseNotify('出航查詢失敗 ‼️', String(e));
-             resolve('');
-             $done();
-             return;
+             resolve(null);
            }
          } else if (response.status === 401) {
-           refreshJwtTokens()
-             .then(() => reject(new RetryError("Token refreshed in getItinerary")))
-             .catch(reject);
+           refreshJwtTokens().catch(reject);
            return;
 
          } else {
            starCruiseNotify('Cookie 已過期 ‼️', `(${response.status}) 請重新登入`);
-           resolve('');
-           $done();
-           return;
+           resolve(null);
          }
        }
      });
@@ -376,8 +339,7 @@
    const tokens = getJwtTokens();
    if (tokens == null) {
      starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
-     $done();
-     return;
+     return null;
    }
 
    return new Promise((resolve, reject) => {
@@ -391,9 +353,8 @@
      $httpClient.get(requestUrl, function(error, response, body) {
        if (error) {
          starCruiseNotify('查房失敗 ‼️', '連線錯誤');
-         resolve([]);
-         $done();
-         return;
+         resolve(null);
+
        } else {
          if (response.status === 200) {
            try {
@@ -431,21 +392,15 @@
 
            } catch (e) {
              starCruiseNotify('查房失敗 ‼️', String(e));
-             resolve([]);
-             $done();
-             return;
+             resolve(null);
            }
          } else if (response.status === 401) {
-           refreshJwtTokens()
-             .then(() => reject(new RetryError("Token refreshed in getItinerary")))
-             .catch(reject);
+           refreshJwtTokens().catch(reject);
            return;
 
          } else {
            starCruiseNotify('Cookie 已過期 ‼️', `(${response.status})請重新登入`);
-           resolve([]);
-           $done();
-           return;
+           resolve(null);
          }
        }
      });
@@ -534,6 +489,8 @@
 
  async function executeWithRetry(maxRetry = 1) {
    for (let attempt = 0; attempt <= maxRetry; attempt++) {
+     console.log(`[Attempt ${attempt+1}/${maxRetry+1}] start`);
+     
      try {
        await execute();
        return;
@@ -556,103 +513,105 @@
 
    console.log("Run auto cabin bot.")
 
-   try {
-     const portNum = $persistentStore.read(PORT_KEY) || 12;
-     const persons = $persistentStore.read(PAX_KEY) || 3;
-     const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) || "五";
-     const enableNotify = $persistentStore.read(ENABLE_NOTIFY_KEY) || 0; // 0 = no notify, 1 = notify enableNotify, 2 = notify all
 
-     let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
-     if (checkDayStr != null && typeof checkDayStr === "string") {
-       checkDays = checkDayStr.split("");
-     }
+   const portNum = String($persistentStore.read(PORT_KEY) || "12");
+   const persons = parseInt($persistentStore.read(PAX_KEY) || "3", 10);
+   const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) || "五";
+   let enableNotify = parseInt($persistentStore.read(ENABLE_NOTIFY_KEY) || "0", 10);
 
-     if (Number.isNaN(enableNotify)) {
-       enableNotify = 0;
-     }
+   let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
+   if (checkDayStr != null && typeof checkDayStr === "string") {
+     checkDays = checkDayStr.split("");
+   }
 
-     const customerInfo = await getCustomerInfo();
-     if (customerInfo === '') {
-       starCruiseNotify('旅客資訊錯誤', `沒有資料`);
-       $done();
-       return;
-     }
+   if (Number.isNaN(enableNotify)) {
+     enableNotify = 0;
+   }
 
-     await randomDelay();
-     const portDictionary = await getPortInfos();
-     if (!(portNum in portDictionary)) {
-       starCruiseNotify('港口編號錯誤', `未知港口編號 ${portNum}`);
-       $done();
-       return;
-     }
-
-     await randomDelay();
-     const departureDates = await getDepartureDates(portNum);
-     if (departureDates.length == 0) {
-       starCruiseNotify('出發日查詢', '沒有資料');
-       $done();
-       return;
-     }
-
-     let messages = [];
-     let lastGroupYearMonth = "";
-     for (let i = 0; i < departureDates.length; i++) {
-       const date = departureDates[i];
-
-       const dateDay = getDateDayValue(date);
-       if (!checkDays.includes(dateDay)) {
-         continue;
-       }
-
-       await randomDelay();
-       const itinerary = await getItinerary(portNum, date);
-       await randomDelay();
-       const cabins = await checkCabin(portNum, date, urlencode(itinerary), persons, enableNotify);
-
-       const shortItinerary = getShortItinerary(itinerary);
-       const cabinInfo = getCabinInfos(cabins);
-
-       const yearMonth = getDateYearMonth(date);
-       if (lastGroupYearMonth !== yearMonth) {
-         if (lastGroupYearMonth != "") {
-           messages.push('\n');
-         }
-
-         messages.push(yearMonth);
-         lastGroupYearMonth = yearMonth;
-       }
-
-       const cabinStatusSymbol = cabins.length > 0 ? "✅" : "❌";
-       let result = `${cabinStatusSymbol} ${getDateDay(date)} ${shortItinerary}`;
-       messages.push(result);
-
-       if (cabinInfo !== '') {
-         messages.push(cabinInfo);
-       }
-     }
-
-     // 一次顯示全部資訊
-     const msg = '🌟 [Star Cruises] 探索星號 🚢\n' +
-       `${customerInfo}\n` +
-       `查詢時間：${getCurrentDateTime()}\n` +
-       `出發地：${portDictionary[portNum]} ｜ 人數：${persons} 人\n` +
-       '\n' +
-       `${messages.join('\n')}`;
-
-     if (enableNotify == 0) {
-       quickDisplay(msg);
-     } else {
-       console.log(`${msg}`);
-     }
-
-   } catch (e) {
-     starCruiseNotify('執行錯誤', String(e));
-     $done();
+   const customerInfo = await getCustomerInfo();
+   if (customerInfo == null || customerInfo === '') {
+     starCruiseNotify('旅客資訊錯誤', `沒有資料`);
      return;
    }
 
-   $done();
-   return;
+   await randomDelay();
+   const portDictionary = await getPortInfos();
+   if (portDictionary == null) {
+     starCruiseNotify('港口資訊錯誤', `沒有資料`);
+     return;
+   }
+
+   if (!portDictionary.hasOwnProperty(portNum)) {
+     starCruiseNotify('港口編號錯誤', `未知港口編號 ${portNum}`);
+     return;
+   }
+
+   await randomDelay();
+   const departureDates = await getDepartureDates(portNum);
+   if (departureDates == null || departureDates.length == 0) {
+     starCruiseNotify('出發日查詢', '沒有資料');
+     return;
+   }
+
+   let messages = [];
+   let lastGroupYearMonth = "";
+   for (let i = 0; i < departureDates.length; i++) {
+     const date = departureDates[i];
+
+     const dateDay = getDateDayValue(date);
+     if (!checkDays.includes(dateDay)) {
+       continue;
+     }
+
+     await randomDelay();
+     const itinerary = await getItinerary(portNum, date);
+     if (itinerary == null) {
+       starCruiseNotify('getItinerary查詢', '沒有資料');
+       return;
+     }
+
+     await randomDelay();
+     const cabins = await checkCabin(portNum, date, urlencode(itinerary), persons, enableNotify);
+     if (cabins == null) {
+       starCruiseNotify('房間查詢', '沒有資料');
+       return;
+     }
+
+     const shortItinerary = getShortItinerary(itinerary);
+     const cabinInfo = getCabinInfos(cabins);
+
+     const yearMonth = getDateYearMonth(date);
+     if (lastGroupYearMonth !== yearMonth) {
+       if (lastGroupYearMonth != "") {
+         messages.push('\n');
+       }
+
+       messages.push(yearMonth);
+       lastGroupYearMonth = yearMonth;
+     }
+
+     const cabinStatusSymbol = cabins.length > 0 ? "✅" : "❌";
+     let result = `${cabinStatusSymbol} ${getDateDay(date)} ${shortItinerary}`;
+     messages.push(result);
+
+     if (cabinInfo !== '') {
+       messages.push(cabinInfo);
+     }
+   }
+
+   // 一次顯示全部資訊
+   const msg = '🌟 [Star Cruises] 探索星號 🚢\n' +
+     `${customerInfo}\n` +
+     `查詢時間：${getCurrentDateTime()}\n` +
+     `出發地：${portDictionary[portNum]} ｜ 人數：${persons} 人\n` +
+     '\n' +
+     `${messages.join('\n')}`;
+
+   if (enableNotify == 0) {
+     quickDisplay(msg);
+   } else {
+     console.log(`${msg}`);
+   }
  }
 
  executeWithRetry(1)

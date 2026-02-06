@@ -29,6 +29,31 @@
    );
  }
 
+ function notifyFoundCabin(result = '') {
+
+   // 捷徑名稱（請先在捷徑 App 建一個同名捷徑）
+   const shortcutName = "StarCruise顯示";
+
+   // Shortcuts URL scheme（把 result 當作捷徑輸入）
+   const url =
+     "shortcuts://run-shortcut?name=" +
+     encodeURIComponent(shortcutName) +
+     "&input=" +
+     encodeURIComponent(result);
+
+   // 發一則可操作的通知：點了就打開捷徑並把值丟進去
+   $notification.post(
+     "[StarCruise] 看門狗",
+     "找到房間",
+     result, {
+       action: "open-url", // 點通知後執行「開網址」
+       url, // 這個網址就是上面的 shortcuts://...
+       sound: true, //（可選）有提示音
+       "auto-dismiss": 0 //（可選）0 代表不自動消失
+     }
+   );
+ }
+
  function quickLogin() {
    // 捷徑名稱（請先在捷徑 App 建一個同名捷徑）
    const shortcutName = "StarCruise登入";
@@ -390,7 +415,7 @@
                    .map(item => `(${item.cabin_fare}P) ${getDateDay(item.departure_date)} ${item.traditional_chinese_cabin_name}`)
                    .join("\n");
 
-                 starCruiseNotify('找到房間', output);
+                 notifyFoundCabin(output);
                  console.log(output);
                }
              }

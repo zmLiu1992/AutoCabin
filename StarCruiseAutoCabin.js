@@ -653,6 +653,6 @@
        stack: e && e.stack,
        raw: e
      };
-     console.log('執行錯誤', JSON.stringify(safe));
+     console.log(`執行錯誤: ${JSON.stringify(safe)}`);
      $done();
    });

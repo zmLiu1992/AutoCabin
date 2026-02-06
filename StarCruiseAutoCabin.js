@@ -151,7 +151,7 @@
    }
  }
 
- function getCustomerInfo() {
+ function getCustomerInfo(retried = false) {
    const tokens = getJwtTokens();
    if (tokens == null) {
      //starCruiseNotify('金鑰不存在 ‼️', '請重新登入');
@@ -183,9 +183,17 @@
              resolve(null);
            }
          } else if (response.status === 401) {
-           refreshJwtTokens().catch(reject);
-           return;
-
+           if (!retried) {
+             refreshJwtTokens()
+               .then(() => {
+                 // 用新 token 立刻重打一次（你可以把 request 包成一個 inner function）
+                 resolve(getCustomerInfo(true));
+               })
+               .catch(reject);
+             return;
+           } else {
+             reject(new Error(`getCustomerInfo failed, status=${response.status}`));
+           }
          } else {
            starCruiseNotify('Token 已過期 ‼️', `(${response.status}) 請重新登入`);
            resolve(null);
@@ -490,7 +498,7 @@
  async function executeWithRetry(maxRetry = 1) {
    for (let attempt = 0; attempt <= maxRetry; attempt++) {
      console.log(`[Attempt ${attempt+1}/${maxRetry+1}] start`);
-     
+
      try {
        await execute();
        return;
@@ -614,6 +622,12 @@
  executeWithRetry(1)
    .then(() => $done())
    .catch(e => {
-     console.log('執行錯誤', String(e && e.message ? e.message : e));
+     const safe = {
+       name: e && e.name,
+       message: e && e.message,
+       stack: e && e.stack,
+       raw: e
+     };
+     console.log('執行錯誤', JSON.stringify(safe));
      $done();
    });

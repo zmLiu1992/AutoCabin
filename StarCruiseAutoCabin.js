@@ -82,6 +82,7 @@
  const PORT_KEY = "StarCruise_portNum";
  const PAX_KEY = "StarCruise_paxNum";
  const CHECK_DAY_KEY = "StarCruise_day";
+ const SKIP_DATE_KEY = "StarCruise_skipDate";
  const ENABLE_NOTIFY_KEY = "StarCruise_enableNotify";
 
  const cabinName_Balcony = "Balcony Stateroom";
@@ -547,11 +548,17 @@
    const portNum = String($persistentStore.read(PORT_KEY) || "12");
    const persons = parseInt($persistentStore.read(PAX_KEY) || "3", 10);
    const checkDayStr = $persistentStore.read(CHECK_DAY_KEY) || "五";
+   const skipDateStr = $persistentStore.read(SKIP_DATE_KEY) || "";
    let enableNotify = parseInt($persistentStore.read(ENABLE_NOTIFY_KEY) || "0", 10);
 
    let checkDays = ["一", "二", "三", "四", "五", "六", "日"]
    if (checkDayStr != null && typeof checkDayStr === "string") {
      checkDays = checkDayStr.split("");
+   }
+   
+   let skipDates = []
+   if (skipDateStr != null && typeof skipDateStr === "string") {
+     skipDates = skipDateStr.split(",");
    }
 
    if (Number.isNaN(enableNotify)) {
@@ -592,6 +599,10 @@
      if (!checkDays.includes(dateDay)) {
        continue;
      }
+	 
+	 if (skipDates.includes(date)) {
+		 continue;
+	 }
 
      await randomDelay();
      const itinerary = await getItinerary(portNum, date);
